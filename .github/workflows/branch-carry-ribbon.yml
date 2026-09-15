@@ -1,0 +1,36 @@
+name: B.R.A.N.C.H. drop-in lint
+
+on:
+  push:
+    paths:
+      - ".branch/**"
+      - "README.md"
+  pull_request:
+    paths:
+      - ".branch/**"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-dropin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare repository workspace
+        shell: bash
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Lint local B.R.A.N.C.H. carrier files
+        shell: bash
+        run: |
+          test -f .branch/records.br0
+          test -f .branch/manifest.json
+          grep -Eq '^BRANCH0\.' .branch/records.br0
+          grep -q 'branch.repository-dropin/0' .branch/manifest.json
+          grep -q 'branchbootstrapv0' .branch/manifest.json
+          grep -q 'branch-bootstrap-v0' .branch/manifest.json
